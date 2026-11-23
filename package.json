@@ -4,8 +4,9 @@
   "description": "Backend aplikacije Učiteljski planer - Node.js, Express i MongoDB",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Danijel97/uciteljski-planer-backend.git"
@@ -13,7 +14,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/Danijel97/uciteljski-planer-backend/issues"
   },
