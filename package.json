@@ -20,7 +20,9 @@
   },
   "homepage": "https://github.com/Danijel97/uciteljski-planer-backend#readme",
   "dependencies": {
-    "express": "^5.3.0"
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "mongoose": "^9.13.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
