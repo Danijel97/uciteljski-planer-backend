@@ -1,6 +1,8 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import Korisnik from "../models/Korisnik.js";
+import jwt from "jsonwebtoken";
+import provjeriToken from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -91,5 +93,91 @@ router.post("/registracija", async (req, res) => {
         });
     }
 });
+router.post("/prijava", async (req, res) => {
+    try {
+        const { email, lozinka } = req.body;
 
+        // Provjera unesenih podataka
+        if (typeof email !== "string" || typeof lozinka !== "string" ||
+            !email.trim() || !lozinka) {
+            return res.status(400).json({
+                greska: "Potrebno je unijeti email i lozinku"
+            });
+        }
+
+        // Pronalazak korisnika
+        const korisnik = await Korisnik.findOne({
+            email: email.trim().toLowerCase()
+        });
+
+        if (!korisnik) {
+            return res.status(401).json({
+                greska: "Neispravan email ili lozinka"
+            });
+        }
+
+        // Provjera lozinke
+        const ispravnaLozinka = await bcrypt.compare(
+            lozinka,
+            korisnik.lozinka
+        );
+
+        if (!ispravnaLozinka) {
+            return res.status(401).json({
+                greska: "Neispravan email ili lozinka"
+            });
+        }
+
+        // Generiranje JWT tokena
+        const token = jwt.sign(
+            { id: korisnik._id.toString() },
+            process.env.JWT_SECRET,
+            { expiresIn: "2h" }
+        );
+
+        // Uspjesna prijava
+        return res.status(200).json({
+            poruka: "Uspjesna prijava",
+            token: token,
+            korisnik: {
+                id: korisnik._id,
+                ime: korisnik.ime,
+                prezime: korisnik.prezime,
+                email: korisnik.email
+            }
+        });
+
+    } catch (greska) {
+        console.error(greska);
+
+        return res.status(500).json({
+            greska: "Greska na serveru"
+        });
+    }
+});
+router.get("/profil", provjeriToken, async (req, res) => {
+    try {
+        const korisnik = await Korisnik.findById(req.korisnikId);
+
+        if (!korisnik) {
+            return res.status(401).json({
+                greska: "Korisnik nije pronaden"
+            });
+        }
+
+        return res.status(200).json({
+            id: korisnik._id,
+            ime: korisnik.ime,
+            prezime: korisnik.prezime,
+            email: korisnik.email
+        });
+
+    } catch (greska) {
+        console.error(greska);
+
+        return res.status(500).json({
+            greska: "Greska na serveru"
+        });
+    }
+});
 export default router;
